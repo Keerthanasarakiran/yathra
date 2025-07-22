@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thiruvananthapuram City Circular Bus Tracker | KSRTC</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --ksrtc-green: #006837;
+            --ksrtc-yellow: #FFD700;
+            --ksrtc-white: #FFFFFF;
+            --ksrtc-lightgray: #F5F5F5;
+            --ksrtc-red: #D32F2F;
+        }
+        
+        /* Base styles for all devices */
+        body {
+            font-family: 'Noto Sans Malayalam', 'Roboto', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Malayalam:wght@400;700&family=Roboto:wght@300;400;500;700&display=swap');
+
+        /* Background image for larger screens */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100vh;
+            background-image: url('bus.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        /* Content container */
+        .content-container {
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.95);
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        /* Top Banner */
+        .top-banner {
+            background-color: var(--ksrtc-red);
+            color: white;
+            padding: 8px 0;
+            text-align: center;
+            font-size: 0.9rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .marquee {
+            white-space: nowrap;
+            display: inline-block;
+            animation: scroll 20s linear infinite;
+        }
+
+        @keyframes scroll {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* Header with logo and kathakali */
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--ksrtc-white);
+            padding: 10px 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .kathakali-img {
+            height: 70px;
+            display: none; /* Hidden on mobile by default */
+        }
+
+        .header-title {
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        .header-title h1 {
+            color: var(--ksrtc-green);
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .header-title p {
+            margin: 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Official banner */
+        .official-banner {
+            background-color: var(--ksrtc-yellow);
+            color: #000;
+            padding: 8px 0;
+            text-align: center;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Control Panel */
+        .control-panel {
+            background: var(--ksrtc-white);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+            margin-top: 1rem;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .input-field {
+            flex: 1;
+            min-width: 100%;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--ksrtc-green);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0,104,55,0.2);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary {
+            background-color: var(--ksrtc-green);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #005a2e;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .btn-secondary {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background-color: #e0e0e0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        /* Results Container */
+        .results-container {
+            background: var(--ksrtc-white);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+
+        .bus-route {
+            border-left: 4px solid var(--ksrtc-green);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: var(--ksrtc-lightgray);
+            border-radius: 0 6px 6px 0;
+            transition: all 0.3s;
+        }
+
+        .bus-route:hover {
+            transform: translateX(4px);
+            box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .route-number {
+            font-weight: 700;
+            color: var(--ksrtc-green);
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .route-name {
+            font-style: italic;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .route-details {
+            margin-top: 0.5rem;
+            color: #555;
+            font-size: 0.9rem;
+        }
+
+        /* Instructions Section */
+        .instructions {
+            background: var(--ksrtc-white);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .instructions h3 {
+            color: var(--ksrtc-green);
+            margin-top: 0;
+            border-bottom: 2px solid var(--ksrtc-yellow);
+            padding-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        /* All Routes Section */
+        .all-routes {
+            background: var(--ksrtc-white);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .all-routes h2 {
+            color: var(--ksrtc-green);
+            margin-top: 0;
+            border-bottom: 2px solid var(--ksrtc-yellow);
+            padding-bottom: 0.5rem;
+        }
+
+        .route-table-container {
+            overflow-x: auto;
+        }
+
+        .route-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            min-width: 600px;
+        }
+
+        .route-table th, .route-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .route-table th {
+            background-color: var(--ksrtc-green);
+            color: white;
+        }
+
+        .route-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .route-table tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* Route color coding */
+        .route-1 { border-left-color: #FF0000; }
+        .route-2 { border-left-color: #0000FF; }
+        .route-3 { border-left-color: #FF00FF; }
+        .route-4 { border-left-color: #FFFF00; background-color: #FFFFF0; }
+        .route-5 { border-left-color: #800080; }
+        .route-6 { border-left-color: #A52A2A; background-color: #F5F5DC; }
+        .route-7 { border-left-color: #008000; }
+        .route-8 { border-left-color: #87CEEB; }
+        .route-9 { border-left-color: #FFA500; }
+        .route-10 { border-left-color: #4B0082; }
+        .route-11 { border-left-color: #FFD700; background-color: #FFFACD; }
+        .route-12 { border-left-color: #808000; background-color: #F0F0E0; }
+        .route-13 { border-left-color: #00FFFF; }
+
+        /* Enhanced Footer */
+        .footer {
+            background-color: #222;
+            color: white;
+            padding: 2rem 0;
+            font-size: 0.9rem;
+        }
+
+        .footer-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .footer-column h3 {
+            color: var(--ksrtc-yellow);
+            margin-top: 0;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            border-bottom: 1px solid #444;
+            padding-bottom: 0.5rem;
+        }
+
+        .footer-column ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-column li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-column a {
+            color: #ccc;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-column a:hover {
+            color: var(--ksrtc-yellow);
+        }
+
+        .contact-info {
+            margin-top: 0.5rem;
+        }
+
+        .contact-info div {
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 1rem;
+        }
+
+        .social-icons a {
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 1.5rem;
+            margin-top: 1.5rem;
+            border-top: 1px solid #444;
+            font-size: 0.8rem;
+            color: #999;
+        }
+
+        /* Tablet and Desktop Styles */
+        @media (min-width: 768px) {
+            .content-container {
+                padding: 20px;
+            }
+            
+            .kathakali-img {
+                display: block;
+                height: 70px;
+            }
+            
+            .header-title h1 {
+                font-size: 1.8rem;
+            }
+            
+            .input-field {
+                min-width: 250px;
+            }
+            
+            .btn {
+                width: auto;
+                margin-bottom: 0;
+            }
+            
+            .footer-container {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+            
+            /* Adjust background for larger screens */
+            body::before {
+                width: 50%;
+                opacity: 0.5;
+            }
+        }
+
+        /* Large Desktop Styles */
+        @media (min-width: 1024px) {
+            .container {
+                padding: 20px 40px;
+            }
+            
+            .header-title h1 {
+                font-size: 2rem;
+            }
+            
+            .input-group {
+                flex-wrap: nowrap;
+            }
+            
+            .btn {
+                padding: 12px 30px;
+            }
+        }
+
+        /* Small Mobile Devices */
+        @media (max-width: 480px) {
+            .top-banner {
+                font-size: 0.7rem;
+                padding: 5px 0;
+            }
+            
+            .header-title h1 {
+                font-size: 1.2rem;
+            }
+            
+            .header-title p {
+                font-size: 0.7rem;
+            }
+            
+            .official-banner {
+                font-size: 0.8rem;
+                padding: 5px 0;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+            
+            .control-panel, .results-container, .instructions, .all-routes {
+                padding: 1rem;
+            }
+            
+            .route-details p {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="content-container">
+        <!-- Top Banner with Scrolling Text -->
+        <div class="top-banner">
+            <div class="marquee">
+                <span style="color:var(--ksrtc-yellow);">ബസ് നിരക്ക്: ₹10 മുതൽ ₹30 വരെ | Bus fare: ₹10 to ₹30 |</span>
+                സർക്കുലാർ സർവീസ് ഓരോ 15-30 മിനിറ്റ് ഇടവിട്ട് പ്രവർത്തിക്കുന്നു | Circular service runs every 15-30 minutes
+            </div>
+        </div>
+
+        <!-- Header -->
+        <div class="header-container">
+            <div class="header-title">
+                <h1>KERALA STATE ROAD TRANSPORT CORPORATION</h1>
+                <p>Thiruvananthapuram City Circular Bus Service</p>
+            </div>
+            <img src="kathakali.png" alt="Kathakali" class="kathakali-img">
+        </div>
+
+        <div class="official-banner">
+            THIRUVANANTHAPURAM CITY BUS SERVICE
+        </div>
+        
+        <!-- Main Content -->
+        <main class="container">
+            <section class="instructions">
+                <h3>User Guide / ഉപയോക്തൃ മാർഗ്ഗദർശിക</h3>
+                <ol>
+                    <li><strong>Enter locations / സ്ഥലങ്ങൾ നൽകുക</strong><br>
+                        Type your starting point (e.g., "East Fort") in the "From" box and destination (e.g., "Overbridge") in the "To" box.
+                        <em>ഉദാഹരണം: "From"ൽ "East Fort", "To"യിൽ "Overbridge" എന്ന് നൽകുക.</em>
+                    </li>
+                    <li><strong>Search Buses / ബസുകൾ തിരയുക</strong><br>
+                        Click "Find buses" to see direct routes or "Show all routes" for complete list.
+                        <em>"Find buses" ക്ലിക്ക് ചെയ്താൽ നേരിട്ടുള്ള ബസ് റൂട്ടുകൾ കാണാം.</em>
+                    </li>
+                    <li><strong>Check Results / ഫലങ്ങൾ പരിശോധിക്കുക</strong><br>
+                        Matching buses will appear below with complete route details.
+                        <em>ബസ് റൂട്ടുകൾ താഴെ കാണാം.</em>
+                    </li>
+                </ol>
+            </section>
+
+            <section class="control-panel">
+                <div class="input-group">
+                    <div class="input-field">
+                        <input type="text" id="from-input" placeholder="From (e.g. East Fort)" aria-label="Starting location">
+                    </div>
+                    <div class="input-field">
+                        <input type="text" id="to-input" placeholder="To (e.g. Overbridge)" aria-label="Destination">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <button id="search-btn" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Find Buses
+                    </button>
+                    <button id="show-all-btn" class="btn btn-secondary">
+                        <i class="fas fa-bus"></i> Show All Routes
+                    </button>
+                </div>
+            </section>
+
+            <section class="results-container">
+                <div id="results"></div>
+            </section>
+
+            <section class="all-routes">
+                <h2>All City Circular Routes</h2>
+                <div class="route-table-container">
+                    <table class="route-table">
+                        <thead>
+                            <tr>
+                                <th>Route No.</th>
+                                <th>Route Name</th>
+                                <th>Route Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="all-routes-table">
+                            
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+        
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-container">
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="#"><i class="fas fa-home"></i> Home</a></li>
+                        <li><a href="#"><i class="fas fa-info-circle"></i> About Us</a></li>
+                        <li><a href="#"><i class="fas fa-ticket-alt"></i> View Booking</a></li>
+                        <li><a href="#"><i class="fas fa-times-circle"></i> Cancellation</a></li>
+                        <li><a href="#"><i class="fas fa-comment-alt"></i> Feedback</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Contact Us</h3>
+                    <div class="contact-info">
+                        <div><i class="fas fa-phone"></i> 0471-2463799</div>
+                        <div><i class="fas fa-mobile-alt"></i> 9447071021</div>
+                        <div><i class="fas fa-phone-volume"></i> 18005994011 (Toll Free)</div>
+                        <div><i class="fab fa-whatsapp"></i> 9497722205</div>
+                        <div><i class="fas fa-envelope"></i> rsnksrtc@kerala.gov.in</div>
+                    </div>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Help & Support</h3>
+                    <ul>
+                        <li><a href="#"><i class="fas fa-route"></i> Route Related Enquiry</a></li>
+                        <li><a href="#"><i class="fas fa-laptop-code"></i> Technical Enquiry</a></li>
+                        <li><a href="#"><i class="fas fa-image"></i> Gallery</a></li>
+                        <li><a href="#"><i class="fas fa-lock"></i> Privacy Policy</a></li>
+                        <li><a href="#"><i class="fas fa-file-alt"></i> Terms & Conditions</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Corporate Office</h3>
+                    <p>
+                        <i class="fas fa-building"></i> Kerala State Road Transport Corporation<br>
+                        Office of Managing Director<br>
+                        Transport Bhavan, Fort<br>
+                        Thiruvananthapuram, Kerala<br>
+                        India - 695023
+                    </p>
+                    
+                    <h3>We Social</h3>
+                    <div class="social-icons">
+                        <a href="https://www.facebook.com/KeralaStateRoadTransportCorporation" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://www.instagram.com/invites/contact" target="_blank"><i class="fab fa-instagram"></i></a>
+                        <a href="https://twitter.com/transport_state?s=08" target="_blank"><i class="fab fa-twitter"></i></a>
+                        <a href="https://www.linkedin.com/company/82535522/admin" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="https://www.youtube.com/@keralastateroadtransportco3176" target="_blank"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                &copy; 2023 Kerala State Road Transport Corporation. All Rights Reserved.
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Bus routes data
+        const busRoutes = [
+            {
+                number: "1C/1A",
+                name: "Red Clockwise/Anti-Clockwise",
+                stops: ["East Fort", "Overbridge", "Thampanoor", "Overbridge", "Ayurveda College", "Statue", "Spencer", "VJT", "Kerala University", "Palayam", "Legislature", "PMG", "Vikas Bhavan Depot", "PMG", "LMS", "Museum", "Kanakakunnu", "Manaveeyam Road", "Police Headquarters", "Vazhuthakkad", "Police Training College", "Mettukada", "Thycaud Hospital", "Fly Over", "Thampanoor", "Overbridge", "East Fort"],
+                schedule: "Every 10-15 minutes from 6:00 AM to 10:00 PM"
+            },
+            {
+                number: "2C/2A",
+                name: "Blue Clockwise/Anti-Clockwise",
+                stops: ["East Fort", "Overbridge", "Thampanoor", "Overbridge", "Ayurveda College", "Uppitamudu Bridge", "Vanchiyur Court", "Pattur", "General Hospital", "Kerala University", "Palayam", "Legislature", "PMG", "LMS", "Museum", "Kanakakunnuu", "Vellayambalam", "Shastamangalam", "Sri Ramakrishna Hospital", "Marutankuzhi", "Kochar Road", "Edapachinji", "Jagati", "Vazhuthakad", "Bakery Junction", "Jacobs Junction", "Cantonment Gate", "Statue", "Ayurveda College", "Overbridge", "Thampanoor", "East Fort"],
+                schedule: "Every 15-20 minutes from 6:00 AM to 10:00 PM"
+            },
+            {
+                number: "3C/3A",
+                name: "Magenta Clockwise/Anti-Clockwise",
+                stops: ["Peroorkada Depot", "Peroorkada", "Ambalamukk", "Kowdiar", "TTC", "Vellayambalam", "Museum", "LMS", "Palayam", "Statue", "Thampanoor", "Aristo", "Model School", "Bakery (Underpass)", "RBI", "Palayam (Stadium)", "Legislature", "PMG", "Plamoodu", "Pattom", "Kesavadasapuram", "Pattom", "Kuravankonam", "Kowdiar", "Ambalammukku", "Peroorkada", "Peroorkada Depot"],
+                schedule: "Every 20 minutes from 6:00 AM to 9:30 PM"
+            },
+            {
+                number: "4C/4A",
+                name: "Yellow Clockwise/Anti-Clockwise",
+                stops: ["Peroorkada Depot", "Peroorkada", "Ambalamukku", "Kowdiar", "TTC", "Devaswom Board", "Nanthancode", "Museum", "LMS", "Palayam", "VJT", "Kerala University", "Flyover", "Legislature", "PMG", "Plamoodu", "Pattom", "Potakuzhi", "Medical College", "Ulloor", "Kesavadasapuram", "Paruthipara", "Muttada", "Vayalikada", "Santwana Junction", "Ambalamukku", "Peroorkada", "Peroorkada Depot"],
+                schedule: "Every 20 minutes from 6:00 AM to 9:30 PM"
+            },
+            {
+                number: "5C/5A",
+                name: "Violet Clockwise/Anti-Clockwise",
+                stops: ["Peroorkada Depot", "Oolampara", "HLL", "Pipinmood", "Edapazhanji", "Cotton Hill School, Vazhuthacaud", "Mettukada", "Thycaud", "Thampanoor", "Ayurveda College", "Statue", "Palayam", "Assembly", "LMS", "Museum", "Vellayambalam", "TTC", "Kowdiar", "Ambalamukku", "Peroorkada", "Peroorkada Depot"],
+                schedule: "Every 20-25 minutes from 6:00 AM to 9:00 PM"
+            },
+            {
+                number: "6C/6A",
+                name: "Brown Clockwise/Anti-Clockwise",
+                stops: ["East Fort", "Overbridge", "Thampanoor", "Flyover", "Chenthitta", "Kannettumukku", "Jagathy", "Edapazhanji", "Sasthamangalam", "Sree Ramakrishna Hospital", "Maruthamkuzhi", "Forest Office (PTP Nagar)", "PTP Nagar", "Vettamukku", "Ilipode", "Valiyavila", "Tirumala", "Vijayamohini Mill", "Poojappura", "Kunchalumoodu", "Karamana", "Killipalam", "Attakkulangara Road", "East Fort"],
+                schedule: "Every 30 minutes from 6:00 AM to 9:00 PM"
+            },
+            {
+                number: "7C/7A",
+                name: "Green Clockwise/Anti-Clockwise",
+                stops: ["East Fort", "Transport Bhavan", "Vazhappally", "Fort Hospital", "Uppidamoodu Bridge", "Petta Pallimukku", "Kannammoola", "Kumarapuram", "Medical College", "Muringapalam", "Pottakuzhi", "Theekumoodu", "Anadyil Hospital", "Law College Junction", "Vikas Bhavan Depot", "P. M. G.", "L. M. S.", "Palayam", "Statue", "Ayurveda College", "Overbridge", "Thampanoor", "Overbridge", "East Fort"],
+                schedule: "Every 20 minutes from 6:00 AM to 9:30 PM"
+            },
+            {
+                number: "8C/8A",
+                name: "Air - Rail Clockwise/Anti-Clockwise",
+                stops: ["East Fort North Bus Stand", "Thampanoor Railway Station", "East Fort South Bus Stand", "Manacaud", "Valiyathura", "Airport (Domestic)", "Airport (International)", "Chakka", "Pettah", "Pattur", "Kerala University", "Thampanoor Railway Station", "East Fort"],
+                schedule: "Every 30 minutes from 5:30 AM to 10:30 PM"
+            },
+            {
+                number: "9C/9A",
+                name: "Orange Clockwise/Anti-Clockwise",
+                stops: ["East Fort", "Thampanoor", "Overbridge", "Secretariat", "Pattor", "Chakai", "Shangumugham", "Airport", "Valiyathura", "Kallumoodu", "Manacaud", "East Fort"],
+                schedule: "Every 30 minutes from 6:00 AM to 9:00 PM"
+            },
+            {
+                number: "10C/10A",
+                name: "Indigo Clockwise/Anti-Clockwise",
+                stops: ["Thampanoor", "East Fort South Bus Stand", "Kalipankulam", "Koncharivila Temple", "Bound Road", "Milma", "Thiruvallam", "Ambalathara", "Kamaleswaram", "Manacaud", "East Fort North Bus Stand", "Thampanoor"],
+                schedule: "Every 30 minutes from 6:00 AM to 9:00 PM"
+            },
+            {
+                number: "11C/11A",
+                name: "Gold Clockwise/Anti-Clockwise",
+                stops: ["Thampanoor", "East Fort South Bus Stand", "Manacaud", "Kamaleswaram", "Ambalathara", "Poonthura", "Beemapally", "Valiyathura", "Mukkolakkal", "Manacaud", "East Fort North Bus Stand", "Thampanoor"],
+                schedule: "Every 30 minutes from 6:00 AM to 9:00 PM"
+            },
+            {
+                number: "12C/12A",
+                name: "Olive Clockwise/Anti-Clockwise",
+                stops: ["Thampanoor", "East Fort South Bus Stand", "Eenchakkal", "Vallakadavu", "Ponnara Bridge", "Sulaiman Street", "Domestic", "Airport (International)", "Chakka", "Petta", "Pattur", "Kerala University", "Thampanoor"],
+                schedule: "Every 30 minutes from 6:00 AM to 9:00 PM"
+            },
+            {
+                number: "13C/13A",
+                name: "Cyan Clockwise/Anti-Clockwise",
+                stops: ["Thampanoor", "East Fort South Bus Stand", "Kamaleswaram", "Kallettumukku", "Ambalathara", "Manikkavilakam", "Kallumoodu", "Manacaud", "East Fort North Bus Stand", "Thampanoor"],
+                schedule: "Every 30 minutes from 6:00 AM to 9:00 PM"
+            }
+        ];
+
+        // Function to find buses between two stops
+        function findBuses(from, to) {
+            const matchingBuses = busRoutes.filter(route => {
+                const fromIndex = route.stops.findIndex(stop => 
+                    stop.toLowerCase().includes(from.toLowerCase()));
+                const toIndex = route.stops.findIndex(stop => 
+                    stop.toLowerCase().includes(to.toLowerCase()));
+                return fromIndex !== -1 && toIndex !== -1 && fromIndex < toIndex;
+            });
+            return matchingBuses;
+        }
+
+        // Function to display all routes in the table
+        function populateRoutesTable() {
+            const tableBody = document.getElementById('all-routes-table');
+            tableBody.innerHTML = '';
+            
+            busRoutes.forEach(route => {
+                const row = document.createElement('tr');
+                row.className = `route-${route.number.substring(0, route.number.indexOf('/'))}`;
+                
+                row.innerHTML = `
+                    <td><strong>${route.number}</strong></td>
+                    <td>${route.name}</td>
+                    <td>${route.stops.join(' → ')}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Display results when button is clicked
+        document.getElementById('search-btn').addEventListener('click', () => {
+            const from = document.getElementById('from-input').value.trim();
+            const to = document.getElementById('to-input').value.trim();
+            
+            if (!from || !to) {
+                alert("Please enter both starting point and destination");
+                return;
+            }
+            
+            const results = findBuses(from, to);
+            displayResults(results, from, to);
+        });
+
+        // Display search results
+        function displayResults(results, from, to) {
+            const resultsDiv = document.getElementById('results');
+            
+            if (results.length === 0) {
+                resultsDiv.innerHTML = `
+                    <div class="no-results">
+                        <h3 style="color: var(--ksrtc-green);">No direct routes found</h3>
+                        <p>We couldn't find direct buses between ${from} and ${to}.</p>
+                        <p>Suggestions:</p>
+                        <ul>
+                            <li>Check spelling of locations</li>
+                            <li>Try major landmarks like 'East Fort', 'Thampanoor'</li>
+                            <li>Contact KSRTC helpline for assistance</li>
+                        </ul>
+                    </div>
+                `;
+            } else {
+                resultsDiv.innerHTML = `
+                    <h2 style="color: var(--ksrtc-green); margin-top: 0;">
+                        Available Routes (${results.length})
+                    </h2>
+                    ${results.map(route => {
+                        const fromIndex = route.stops.findIndex(s => 
+                            s.toLowerCase().includes(from.toLowerCase()));
+                        const toIndex = route.stops.findIndex(s => 
+                            s.toLowerCase().includes(to.toLowerCase()));
+                        const partialRoute = route.stops.slice(fromIndex, toIndex + 1);
+                        
+                        return `
+                            <div class="bus-route route-${route.number.substring(0, route.number.indexOf('/'))}">
+                                <div class="route-number">Route ${route.number}</div>
+                                <div class="route-name">${route.name}</div>
+                                <div class="route-details">
+                                    <p><strong>Your Route Segment:</strong> ${partialRoute.join(' → ')}</p>
+                                    <p><strong>Complete Route:</strong> ${route.stops.join(' → ')}</p>
+                                    <p><strong>Schedule:</strong> ${route.schedule}</p>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                `;
+            }
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Show all routes when button is clicked
+        document.getElementById('show-all-btn').addEventListener('click', () => {
+            document.getElementById('all-routes-table').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            populateRoutesTable();
+        });
+    </script>
+</body>
+</html>
